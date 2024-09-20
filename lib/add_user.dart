@@ -75,22 +75,55 @@ class _AddViewerDialogState extends State<AddViewerDialog> {
   final _passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
 
-  void _addViewer() async {
-    try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-        'name': _emailController.text.split('@')[0],
-        'email': _emailController.text,
-        'role': 'viewer',
-      });
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error adding viewer: $e')));
-    }
+  // void _addViewer() async {
+  //   try {
+  //     UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+  //       email: _emailController.text,
+  //       password: _passwordController.text,
+  //     );
+  //     await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+  //       'name': _emailController.text.split('@')[0],
+  //       'email': _emailController.text,
+  //       'role': 'viewer',
+  //     });
+  //     Navigator.pop(context);
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error adding viewer: $e')));
+  //   }
+  // }
+
+void _addViewer() async {
+  try {
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+    await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+      'name': _emailController.text.split('@')[0],
+      'email': _emailController.text,
+      'role': 'viewer',
+    });
+    
+    // Viewer added successfully
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Viewer added successfully!'),
+        backgroundColor: Colors.green, // Green for success
+      ),
+    );
+    Navigator.pop(context); // Close the dialog after successful addition
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error adding viewer: ${e.toString()}'),
+        backgroundColor: Colors.red, // Red for error
+      ),
+    );
   }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {

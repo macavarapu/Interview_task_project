@@ -166,18 +166,45 @@ class AdminHomeScreen extends StatelessWidget {
             ListTile(
               title: Text('Logout'),
               onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
+                try {
+                  // Perform the logout
+                  await FirebaseAuth.instance.signOut();
+                  
+                  // Show green snackbar for successful logout
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Logout successfully'),
+                      backgroundColor: Colors.green, // Green for success
+                    ),
+                  );
+                  
+                  // Navigate to login screen after logout
+                  Navigator.pushReplacementNamed(context, '/login');
+                } catch (e) {
+                  // Show red snackbar for error during logout
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Logout failed: $e'),
+                      backgroundColor: Colors.red, // Red for error
+                    ),
+                  );
+                }
               },
             ),
           ],
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'viewer').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .where('role', isEqualTo: 'viewer')
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(child: Text('No viewers found.'));
@@ -190,13 +217,11 @@ class AdminHomeScreen extends StatelessWidget {
               return ListTile(
                 title: Text(viewer['name']),
                 subtitle: Text('Email: ${viewer['email']}'),
-                
               );
             },
           );
         },
       ),
-      
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(

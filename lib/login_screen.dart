@@ -17,26 +17,73 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = '';
   bool _showPassword = false;
 
-  void _login() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).get();
+  // void _login() async {
+  //   if (_formKey.currentState!.validate()) {
+  //     try {
+  //       UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+  //       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).get();
 
-        if (userDoc.exists) {
-          if (userDoc['role'] == 'admin') {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AdminHomeScreen(user: userCredential.user!)));
-          } else {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ViewerHomeScreen(user: userCredential.user!)));
-          }
+  //       if (userDoc.exists) {
+  //         if (userDoc['role'] == 'admin') {
+  //           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AdminHomeScreen(user: userCredential.user!)));
+  //         } else {
+  //           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ViewerHomeScreen(user: userCredential.user!)));
+  //         }
+  //       } else {
+  //         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User login is successfully')));
+  //       }
+  //     } catch (e) {
+  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+  //     }
+  //   }
+  // }
+void _login() async {
+  if (_formKey.currentState!.validate()) {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).get();
+
+      if (userDoc.exists) {
+        if (userDoc['role'] == 'admin') {
+          // Admin login successful
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Admin login successful!'),
+              backgroundColor: Colors.green, // Green for success
+            ),
+          );
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AdminHomeScreen(user: userCredential.user!)));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User login is successfully')));
+          // Viewer login successful
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Viewer login successful!'),
+              backgroundColor: Colors.green, // Green for success
+            ),
+          );
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ViewerHomeScreen(user: userCredential.user!)));
         }
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('User does not exist!'),
+            backgroundColor: Colors.red, // Red for error
+          ),
+        );
       }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login failed: ${e.toString()}'),
+          backgroundColor: Colors.red, // Red for error
+        ),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

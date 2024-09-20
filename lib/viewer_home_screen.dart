@@ -130,11 +130,31 @@ class ViewerHomeScreen extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.login_outlined,size: 20,color: Colors.red,),
               title: Text('Logout'),
               onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
+                try {
+                  // Perform the logout
+                  await FirebaseAuth.instance.signOut();
+                  
+                  // Show green snackbar for successful logout
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Logout successfully'),
+                      backgroundColor: Colors.green, // Green for success
+                    ),
+                  );
+                  
+                  // Navigate to login screen after logout
+                  Navigator.pushReplacementNamed(context, '/login');
+                } catch (e) {
+                  // Show red snackbar for error during logout
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Logout failed: $e'),
+                      backgroundColor: Colors.red, // Red for error
+                    ),
+                  );
+                }
               },
             ),
           ],
@@ -147,8 +167,7 @@ class ViewerHomeScreen extends StatelessWidget {
           children: [
             Text('Welcome, ${user.displayName ?? 'Viewer'}!'),
             SizedBox(height: 20),
-            Card(
-              child: Text('Email: ${user.email}')),
+            Text('Email: ${user.email}'),
           ],
         ),
       ),
